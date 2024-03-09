@@ -45,8 +45,9 @@ const TaskDetail = React.memo(({taskId, isExpanded, setIsExpanded}: TaskDetailPr
         });
 
         const resourcesQuery = useQuery({
-            queryKey: ['resources'],
-            queryFn: getAllResources,
+            queryKey: ['project', editingProjectId, 'resources'],
+            enabled: !!editingProjectId,
+            queryFn: ()=> getAllResources(editingProjectId ?? ''),
             staleTime: 60000, // 10 minutes in milliseconds
         });
 

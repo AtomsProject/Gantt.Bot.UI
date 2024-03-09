@@ -2,6 +2,7 @@ import React from 'react';
 import InputDateField from "./InputDateField.tsx";
 import {v4 as uuidV4} from 'uuid';
 import {FaRegTrashCan} from "react-icons/fa6";
+import { Resource, UnavailablePeriod } from '../model/Resources.ts';
 
 interface ResourceUnavailablePeriodProps {
     setResource: React.Dispatch<React.SetStateAction<Resource | undefined>>
