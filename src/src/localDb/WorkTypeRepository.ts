@@ -16,13 +16,34 @@ export function getWorkTypeById(id: string): WorkType | undefined {
     return workTypes.find(resource => resource.id === id);
 }
 
-export function addWorkType(resource: WorkType): Promise<WorkType> {
+export function addWorkType(workType: WorkType): Promise<WorkType> {
     return new Promise((resolve, reject) => {
         try {
             const workTypes = getAllWorkTypes();
-            const updatedWorkTypes = [...workTypes, resource];
+            const updatedWorkTypes = [...(workTypes.filter(w => w.id !== workType.id)), workType];
             localStorage.setItem(getLocalStorageKey('workTypes'), JSON.stringify(updatedWorkTypes));
-            resolve(resource);
+            resolve(workType);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+export function addWorkTypes(workTypesToAdd: WorkType[]): Promise<WorkType[]> {
+    return new Promise((resolve, reject) => {
+        try {
+            const workTypes = getAllWorkTypes();
+            const updatedWorkTypes = [...workTypes];
+            workTypesToAdd.forEach(workTypeToAdd => {
+                const index = updatedWorkTypes.findIndex(w => w.id === workTypeToAdd.id);
+                if (index !== -1) {
+                    updatedWorkTypes[index] = workTypeToAdd;
+                } else {
+                    updatedWorkTypes.push(workTypeToAdd);
+                }
+            });
+            localStorage.setItem(getLocalStorageKey('workTypes'), JSON.stringify(updatedWorkTypes));
+            resolve(updatedWorkTypes);
         } catch (error) {
             reject(error);
         }

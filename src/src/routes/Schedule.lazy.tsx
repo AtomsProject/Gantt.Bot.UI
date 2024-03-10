@@ -1,17 +1,18 @@
-﻿import {createLazyFileRoute, Outlet} from '@tanstack/react-router';
-import {Mermaid} from "../components/Mermaid.tsx";
-import React, {useEffect, useState} from "react";
-import {ProjectContext} from "../components/ProjectSelectionContext.tsx";
-import {useQuery, useQueryClient} from "@tanstack/react-query";
-import {clearSimulationResult, getSimulationResult} from "../localDb/SimulationRepository";
+﻿import { createLazyFileRoute, Outlet } from '@tanstack/react-router';
+import { Mermaid } from "../components/Mermaid.tsx";
+import React, { useEffect, useState } from "react";
+import { ProjectContext } from "../components/ProjectSelectionContext.tsx";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { clearSimulationResult, getSimulationResult } from "../localDb/SimulationRepository";
 import TabDelimitedTable from "../components/TabDelimitedTable.tsx";
+import { SimulationResult } from '../model/SchedulingTask.ts';
 
 export const Route = createLazyFileRoute('/Schedule')({
     component: Index,
 })
 
 function Index() {
-    const {editingProjectId} = React.useContext(ProjectContext);
+    const { editingProjectId } = React.useContext(ProjectContext);
     const [selectedGraph, setSelectedGraph] = useState('resourceSchedule');
     const [selectedConfidence, setSelectedConfidence] = useState('90');
     const queryClient = useQueryClient();
@@ -27,31 +28,40 @@ function Index() {
         setCopySuccess(null);
     }, [projectQuery.data, selectedGraph]);
 
+    let graphMessage: string | null | undefined;
     let graphToDisplay: string | null | undefined;
-    switch (selectedGraph) {
-        case 'projectSchedule':
-            graphToDisplay = projectQuery.data?.projectSchedule;
-            break;
-        case 'milestoneSchedule':
-            graphToDisplay = projectQuery.data?.milestoneSchedule;
-            break;
-        case 'resourceSchedule':
-            graphToDisplay = projectQuery.data?.resourceSchedule;
-            break;
-        case 'resourceProjectSchedule':
-            graphToDisplay = projectQuery.data?.resourceProjectSchedule;
-            break;
-        case 'taskMap':
-            graphToDisplay = projectQuery.data?.taskMap;
-            break;
-        case 'taskMapDepth':
-            graphToDisplay = projectQuery.data?.taskMapDepth;
-            break;
-        case 'table':
-            graphToDisplay = projectQuery.data?.table;
-            break;
-        default:
-            graphToDisplay = null;
+    if (projectQuery.data === undefined || projectQuery.data === null) {
+        graphMessage = projectQuery.isFetching ? "loading…" : "No data";
+    } else if (typeof projectQuery.data === 'string') {
+        graphMessage = projectQuery.data;
+    }
+    else {
+        const simulationData = projectQuery.data as SimulationResult;
+        switch (selectedGraph) {
+            case 'projectSchedule':
+                graphToDisplay = simulationData.projectSchedule;
+                break;
+            case 'milestoneSchedule':
+                graphToDisplay = simulationData.milestoneSchedule;
+                break;
+            case 'resourceSchedule':
+                graphToDisplay = simulationData.resourceSchedule;
+                break;
+            case 'resourceProjectSchedule':
+                graphToDisplay = simulationData.resourceProjectSchedule;
+                break;
+            case 'taskMap':
+                graphToDisplay = simulationData.taskMap;
+                break;
+            case 'taskMapDepth':
+                graphToDisplay = simulationData.taskMapDepth;
+                break;
+            case 'table':
+                graphToDisplay = simulationData.table;
+                break;
+            default:
+                graphToDisplay = null;
+        }
     }
 
     return (
@@ -67,13 +77,13 @@ function Index() {
                             e.preventDefault();
                             if (editingProjectId) {
                                 clearSimulationResult(editingProjectId ?? '');
-                                await queryClient.invalidateQueries({queryKey: ['project', editingProjectId, 'simulationResult']});
+                                await queryClient.invalidateQueries({ queryKey: ['project', editingProjectId, 'simulationResult'] });
                             }
                         }}>Refresh
                         </button>
                         <div className='w-full'>
                             <label htmlFor="graphSelector"
-                                   className="block text-xs font-medium text-gray-600 dark:text-gray-500">
+                                className="block text-xs font-medium text-gray-600 dark:text-gray-500">
                                 Confidence</label>
                             <select
                                 id="Confidence"
@@ -94,7 +104,7 @@ function Index() {
                         </div>
                         <div className='w-full'>
                             <label htmlFor="graphSelector"
-                                   className="block text-xs font-medium text-gray-600 dark:text-gray-500">
+                                className="block text-xs font-medium text-gray-600 dark:text-gray-500">
                                 Select Graph type</label>
                             <select
                                 id="graphSelector"
@@ -130,9 +140,9 @@ function Index() {
                         <div>
                             <span className='text-gray-500 text-sm'>Edit the markdown in a live editor with </span>
                             <a href='https://mermaid.live/'
-                               className='text-xs text-blue-600 dark:text-blue-500 hover:underline'
-                               target='_blank'
-                               rel='noreferrer'>
+                                className='text-xs text-blue-600 dark:text-blue-500 hover:underline'
+                                target='_blank'
+                                rel='noreferrer'>
                                 Mermaid Live.</a>
                         </div>
                         {copySuccess && <div
@@ -149,9 +159,9 @@ function Index() {
             <div className="ml-44 md:ml-52 flex-1 flex justify-stretch px-3">
                 {graphToDisplay
                     ? selectedGraph === 'table'
-                        ? <TabDelimitedTable data={graphToDisplay}/>
-                        : <Mermaid text={graphToDisplay}/>
-                    : <div className='p-3 text-xl'>{projectQuery.isError ? "Error" : "Loading…"}</div>}
+                        ? <TabDelimitedTable data={graphToDisplay} />
+                        : <Mermaid text={graphToDisplay} />
+                    : <div className='p-3 text-xl'>{projectQuery.isError ? "Error" : graphMessage}</div>}
             </div>
         </div>
     );

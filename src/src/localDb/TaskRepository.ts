@@ -32,6 +32,12 @@ function setTaskObjectStore(objectStore: taskObjectStore): void {
     localStorage.setItem(getLocalStorageKeyForTask(objectStore.projectId), JSON.stringify(objectStore));
 }
 
+export function loadTasks(projectId: string, tasks: TaskItem[]): void {
+    const objectStore = getTaskObjectStore(projectId);
+    objectStore.tasks = tasks;
+    setTaskObjectStore(objectStore);
+}
+
 export function getRootTaskIds(projectId: string): string[] {
     const objStore = getTaskObjectStore(projectId)
 

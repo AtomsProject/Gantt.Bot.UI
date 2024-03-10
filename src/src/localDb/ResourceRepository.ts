@@ -5,6 +5,17 @@ export function getLocalStorageKeyForResources(projectId: string): string {
     return `ganttbot_projects_${projectId}_resources`;
 }
 
+export function loadResources(projectId: string, resources: Resource[]): Promise<void> {
+    return new Promise((resolve, reject) => {
+        try {
+            localStorage.setItem(getLocalStorageKeyForResources(projectId), JSON.stringify(resources));
+            resolve();
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
 export function getAllResources(projectId: string): Resource[] {
     const resources = localStorage.getItem(getLocalStorageKeyForResources(projectId));
     return resources ? JSON.parse(resources).map((resource: Resource) => ({
