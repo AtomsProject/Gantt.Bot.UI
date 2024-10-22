@@ -21,7 +21,7 @@
     "axios": "^1.6.7",
     "flowbite": "^2.3.0",
     "flowbite-react": "^0.7.2",
-    "mermaid": "^10.8.0",
+    "mermaid": "^10.9.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hotkeys-hook": "^4.5.0",
